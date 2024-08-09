@@ -54,7 +54,7 @@ fun View.screenshot(
 fun Context.getActivity(): Activity? {
     return when (this) {
         is Activity -> this
-        is ContextWrapper -> this.baseContext.getActivity()
+        is ContextWrapper -> this.applicationContext.getActivity()
         else -> null
     }
 }
