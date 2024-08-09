@@ -1,6 +1,8 @@
 package com.smarttoolfactory.screenshot
 
 import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Build
@@ -49,12 +51,12 @@ fun View.screenshot(
     }
 }
 
-private static Activity unwrap(Context context) {
-    while (!(context instanceof Activity) && context instanceof ContextWrapper) {
-        context = ((ContextWrapper) context).getBaseContext();
+fun Context.getActivity(): Activity? {
+    return when (this) {
+        is Activity -> this
+        is ContextWrapper -> this.baseContext.getActivity()
+        else -> null
     }
-
-    return (Activity) context;
 }
 
 fun View.screenshot(
@@ -71,11 +73,10 @@ fun View.screenshot(
         )
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
             // Above Android O not using PixelCopy throws exception
             // https://stackoverflow.com/questions/58314397/java-lang-illegalstateexception-software-rendering-doesnt-support-hardware-bit
             PixelCopy.request(
-                unwrap(this.context),
+                this.context.getActivity()!!.window,
                 bounds.toAndroidRect(),
                 bitmap,
                 {
