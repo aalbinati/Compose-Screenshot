@@ -49,6 +49,14 @@ fun View.screenshot(
     }
 }
 
+private static Activity unwrap(Context context) {
+    while (!(context instanceof Activity) && context instanceof ContextWrapper) {
+        context = ((ContextWrapper) context).getBaseContext();
+    }
+
+    return (Activity) context;
+}
+
 fun View.screenshot(
     bounds: Rect,
     bitmapCallback: (ImageResult) -> Unit
@@ -66,13 +74,8 @@ fun View.screenshot(
 
             // Above Android O not using PixelCopy throws exception
             // https://stackoverflow.com/questions/58314397/java-lang-illegalstateexception-software-rendering-doesnt-support-hardware-bit
-            val activityContext = if (this.context is Activity) {
-                this.context
-            } else {
-                (this.context as ContextWrapper).baseContext
-            }
             PixelCopy.request(
-                activityContext.window,
+                unwrap(this.context),
                 bounds.toAndroidRect(),
                 bitmap,
                 {
